@@ -7,9 +7,15 @@ class CourseSerializer(serializers.ModelSerializer):
     Сериализатор для модели Course.
     Преобразует данные курса в JSON и обратно.
     """
+    lessons_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Course
         fields = '__all__'
+
+    def get_lessons_count(self, obj):
+        """Возвращает количество уроков в курсе."""
+        return obj.lessons.count()
 
 
 class LessonSerializer(serializers.ModelSerializer):
