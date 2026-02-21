@@ -386,6 +386,21 @@ files = [
 pygments = "*"
 
 [[package]]
+name = "isort"
+version = "8.0.0"
+description = "A Python utility / library to sort Python imports."
+optional = false
+python-versions = ">=3.10.0"
+groups = ["main"]
+files = [
+    {file = "isort-8.0.0-py3-none-any.whl", hash = "sha256:184916a933041c7cf718787f7e52064f3c06272aff69a5cb4dc46497bd8911d9"},
+    {file = "isort-8.0.0.tar.gz", hash = "sha256:fddea59202f231e170e52e71e3510b99c373b6e571b55d9c7b31b679c0fed47c"},
+]
+
+[package.extras]
+colors = ["colorama"]
+
+[[package]]
 name = "jedi"
 version = "0.19.2"
 description = "An autocompletion tool for Python that can be used for text editors."
@@ -959,4 +974,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13"
-content-hash = "b3dafcc2218e5c537d26077efdec6450f841c52f84574e90e164fe35e378c81e"
+content-hash = "69879aff8440572d4a4f9d5ac4386671d3e4d040707378d33400efec0264fe7b"
