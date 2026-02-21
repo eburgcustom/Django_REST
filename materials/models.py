@@ -2,6 +2,10 @@ from django.db import models
 
 
 class Course(models.Model):
+    """
+    Модель курса.
+    Содержит основную информацию о курсе.
+    """
     title = models.CharField(max_length=200, verbose_name='Название')
     preview = models.ImageField(upload_to='courses/', blank=True, null=True, verbose_name='Превью')
     description = models.TextField(verbose_name='Описание')
@@ -15,6 +19,10 @@ class Course(models.Model):
 
 
 class Lesson(models.Model):
+    """
+    Модель урока.
+    Связана с курсом через ForeignKey.
+    """
     title = models.CharField(max_length=200, verbose_name='Название')
     description = models.TextField(verbose_name='Описание')
     preview = models.ImageField(upload_to='lessons/', blank=True, null=True, verbose_name='Превью')
