@@ -27,12 +27,19 @@
 - Ссылка на видео
 - Связь с Course
 
+### Payment
+- Пользователь
+- Дата оплаты
+- Оплаченный курс или урок
+- Сумма оплаты
+- Способ оплаты (наличные/перевод)
+
 ## API Эндпоинты
 
 ### Курсы (ViewSet)
-- `GET /api/courses/` - список курсов
+- `GET /api/courses/` - список курсов с уроками
 - `POST /api/courses/` - создание курса
-- `GET /api/courses/{id}/` - получение курса
+- `GET /api/courses/{id}/` - получение курса с уроками
 - `PUT/PATCH /api/courses/{id}/` - обновление курса
 - `DELETE /api/courses/{id}/` - удаление курса
 
@@ -42,6 +49,25 @@
 - `GET /api/lessons/{id}/` - получение урока
 - `PUT/PATCH /api/lessons/{id}/` - обновление урока
 - `DELETE /api/lessons/{id}/` - удаление урока
+
+### Платежи (с фильтрацией)
+- `GET /api/payments/` - список платежей
+
+**Фильтрация платежей:**
+- `?paid_course=1` - по курсу
+- `?paid_lesson=1` - по уроку
+- `?payment_method=cash` - по способу оплаты
+
+**Сортировка платежей:**
+- `?ordering=payment_date` - по возрастанию даты
+- `?ordering=-payment_date` - по убыванию даты (по умолчанию)
+
+## Создание тестовых данных
+
+**Через кастомную команду:**
+```bash
+python manage.py create_payments
+```
 
 ## Установка
 
