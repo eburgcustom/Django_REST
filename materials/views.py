@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, permissions
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 
@@ -10,6 +10,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class LessonListCreateView(generics.ListCreateAPIView):
@@ -20,6 +21,7 @@ class LessonListCreateView(generics.ListCreateAPIView):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class LessonRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
@@ -31,3 +33,4 @@ class LessonRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [permissions.IsAuthenticated]
