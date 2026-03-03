@@ -1,8 +1,11 @@
-from rest_framework import generics, permissions, viewsets
+from django.shortcuts import get_object_or_404
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from users.permissions import IsOwnerOrModerator
 
-from .models import Course, Lesson
+from .models import Course, Lesson, Subscription
 from .serializers import CourseSerializer, LessonSerializer
 
 
@@ -11,6 +14,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     ViewSet для модели Course.
     Обеспечивает полный CRUD для курсов.
     """
+
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
@@ -93,3 +97,37 @@ class LessonRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             # Удаление - владелец или модератор
             self.permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator]
         return [permission() for permission in self.permission_classes]
+
+
+class SubscriptionAPIView(APIView):
+    """
+    APIView для управления подписками на курсы.
+    POST - подписка/отписка от курса
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        course_id = request.data.get("course_id")
+
+        if not course_id:
+            return Response(
+                {"error": "Не указан ID курса"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        course_item = get_object_or_404(Course, id=course_id)
+
+        subs_item = Subscription.objects.filter(user=user, course=course_item)
+
+        # Если подписка у пользователя на этот курс есть - удаляем ее
+        if subs_item.exists():
+            subs_item.delete()
+            message = "подписка удалена"
+        # Если подписки у пользователя на этот курс нет - создаем ее
+        else:
+            Subscription.objects.create(user=user, course=course_item)
+            message = "подписка добавлена"
+
+        # Возвращаем ответ в API
+        return Response({"message": message})
