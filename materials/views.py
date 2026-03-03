@@ -24,8 +24,8 @@ class CourseViewSet(viewsets.ModelViewSet):
         # Обычные пользователи видят только свои курсы
         user = self.request.user
         if user.groups.filter(name="moderator").exists():
-            return Course.objects.all()
-        return Course.objects.filter(owner=user)
+            return Course.objects.all().order_by('id')
+        return Course.objects.filter(owner=user).order_by('id')
 
     def get_permissions(self):
         if self.action == "create":
@@ -61,12 +61,12 @@ class LessonListCreateView(generics.ListCreateAPIView):
         # Обычные пользователи видят только свои уроки
         user = self.request.user
         if user.groups.filter(name="moderator").exists():
-            return Lesson.objects.all()
-        return Lesson.objects.filter(owner=user)
+            return Lesson.objects.all().order_by('id')
+        return Lesson.objects.filter(owner=user).order_by('id')
 
     def get_permissions(self):
         if self.request.method == "POST":
-            # Создание уроков - только авторизованные пользователи
+            # Создание уроков - только обычные пользователи (не модераторы)
             self.permission_classes = [permissions.IsAuthenticated]
         else:
             # Просмотр уроков - авторизованные (с фильтрацией по владельцу в get_queryset)
@@ -74,6 +74,10 @@ class LessonListCreateView(generics.ListCreateAPIView):
         return [permission() for permission in self.permission_classes]
 
     def perform_create(self, serializer):
+        # Проверяем, что пользователь не модератор
+        if self.request.user.groups.filter(name="moderator").exists():
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Модераторы не могут создавать уроки")
         # Автоматически привязываем урок к текущему пользователю
         serializer.save(owner=self.request.user)
 
@@ -89,16 +93,23 @@ class LessonRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
 
+    def get_queryset(self):
+        # Обычные пользователи видят только свои уроки
+        user = self.request.user
+        if user.groups.filter(name="moderator").exists():
+            return Lesson.objects.all().order_by('id')
+        return Lesson.objects.filter(owner=user).order_by('id')
+
     def get_permissions(self):
         if self.request.method == "GET":
-            # Просмотр - владелец или модератор
-            self.permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator]
+            # Просмотр - авторизованные (с фильтрацией по владельцу в get_queryset)
+            self.permission_classes = [permissions.IsAuthenticated]
         elif self.request.method in ["PUT", "PATCH"]:
             # Редактирование - владелец или модератор
             self.permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator]
         elif self.request.method == "DELETE":
-            # Удаление - владелец или модератор
-            self.permission_classes = [permissions.IsAuthenticated, IsOwnerOrModerator]
+            # Удаление - авторизованные (с фильтрацией по владельцу в get_queryset)
+            self.permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in self.permission_classes]
 
 
