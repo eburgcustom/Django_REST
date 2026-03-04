@@ -1,21 +1,21 @@
 from rest_framework.pagination import PageNumberPagination
 
 
-class CoursePagination(PageNumberPagination):
+class StandardPagination(PageNumberPagination):
     """
-    Пагинатор для курсов.
-    """
-
-    page_size = 5  # Количество элементов на странице по умолчанию
-    page_size_query_param = "page_size"  # Параметр для изменения размера страницы
-    max_page_size = 20  # Максимальное количество элементов на странице
-
-
-class LessonPagination(PageNumberPagination):
-    """
-    Пагинатор для уроков.
+    Единый пагинатор для курсов и уроков.
     """
 
     page_size = 10  # Количество элементов на странице по умолчанию
     page_size_query_param = "page_size"  # Параметр для изменения размера страницы
-    max_page_size = 50  # Максимальное количество элементов на странице
+    max_page_size = 15  # Максимальное количество элементов на странице
+
+    def get_page_size(self, request):
+        """
+        Переопределяем метод для установки минимального размера страницы.
+        """
+        page_size = super().get_page_size(request)
+        # Устанавливаем минимальный размер страницы 5
+        if page_size < 5:
+            return 5
+        return page_size

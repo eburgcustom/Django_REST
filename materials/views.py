@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from users.permissions import IsOwnerOrModerator
 
 from .models import Course, Lesson, Subscription
-from .paginators import CoursePagination, LessonPagination
+from .paginators import StandardPagination
 from .serializers import CourseSerializer, LessonSerializer
 
 
@@ -18,7 +18,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    pagination_class = CoursePagination
+    pagination_class = StandardPagination
 
     def get_queryset(self):
         # Обычные пользователи видят только свои курсы
@@ -55,7 +55,7 @@ class LessonListCreateView(generics.ListCreateAPIView):
     """
 
     serializer_class = LessonSerializer
-    pagination_class = LessonPagination
+    pagination_class = StandardPagination
 
     def get_queryset(self):
         # Обычные пользователи видят только свои уроки
