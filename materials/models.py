@@ -19,7 +19,7 @@ class Course(models.Model):
         related_name="courses",
         verbose_name="Владелец",
         null=True,
-        blank=True
+        blank=True,
     )
 
     def __str__(self):
@@ -51,7 +51,7 @@ class Lesson(models.Model):
         related_name="lessons",
         verbose_name="Владелец",
         null=True,
-        blank=True
+        blank=True,
     )
 
     def __str__(self):
@@ -60,3 +60,34 @@ class Lesson(models.Model):
     class Meta:
         verbose_name = "Урок"
         verbose_name_plural = "Уроки"
+
+
+class Subscription(models.Model):
+    """
+    Модель подписки пользователя на курс.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name="Пользователь",
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name="Курс",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата подписки")
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+        unique_together = [
+            "user",
+            "course",
+        ]  # Уникальная подписка для пользователя и курса
+
+    def __str__(self):
+        return f"{self.user.email} - {self.course.title}"
