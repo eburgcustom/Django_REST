@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "users",
     "materials",
+    "drf_yasg",
     "django_filters",
     "rest_framework_simplejwt",
 ]
