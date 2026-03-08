@@ -28,6 +28,7 @@
 - Ссылка на видео (только YouTube)
 - Связь с Course
 - Владелец (связь с User)
+- Цена
 
 ### Subscription
 - Пользователь (связь с User)
@@ -35,12 +36,13 @@
 - Дата подписки
 
 ### Payment
-- Пользователь
-- Дата оплаты
-- Оплаченный курс или урок
+- Пользователь (связь с User)
+- Оплаченный курс (связь с Course)
+- Оплаченный урок (связь с Lesson)
 - Сумма оплаты
 - Способ оплаты (наличные/перевод)
-
+- ID сессии Stripe
+- Ссылка на оплату Stripe
 ## Права доступа
 
 ### Модераторы
@@ -81,7 +83,7 @@
 - `DELETE /api/courses/{id}/` - удаление курса (владелец или модератор)
 
 ### Подписки
-- `POST /api/subscription/` - подписка/отписка от курса
+- `POST /api/materials/subscription/` - подписка/отписка от курса
 
 **Тело запроса:**
 ```json
@@ -93,6 +95,35 @@
 ```json
 {
   "message": "подписка добавлена"  // или "подписка удалена"
+}
+```
+
+### Платежи (Stripe)
+- `POST /api/materials/payment/create/` - создание платежа и получение ссылки на оплату
+- `GET /api/materials/payment/{payment_id}/status/` - проверка статуса платежа
+
+**Создание платежа:**
+```json
+{
+  "course_id": 1
+}
+```
+**Ответ:**
+```json
+{
+  "payment_id": 1,
+  "payment_url": "https://checkout.stripe.com/pay/...",
+  "amount": 100.00
+}
+```
+
+**Проверка статуса:**
+```json
+{
+  "payment_id": 1,
+  "status": "paid",
+  "is_paid": true,
+  "amount": 100.00
 }
 ```
 
@@ -118,6 +149,20 @@
 **Сортировка платежей:**
 - `?ordering=payment_date` - по возрастанию даты
 - `?ordering=-payment_date` - по убыванию даты (по умолчанию)
+
+## Установка
+
+1. Клонировать репозиторий
+2. Установить зависимости: `poetry install --no-root`
+3. Создать `.env` файл на основе `.env_example`
+4. Добавить Stripe ключи в `.env`:
+   ```
+   STRIPE_PUBLISHABLE_KEY=pk_test_... (получить на https://dashboard.stripe.com/apikeys)
+   STRIPE_SECRET_KEY=sk_test_... (получить на https://dashboard.stripe.com/apikeys)
+   ```
+5. Выполнить миграции: `python manage.py migrate`
+6. Создать группу модераторов: `python manage.py loaddata users/fixtures/groups.json`
+7. Запустить сервер: `python manage.py runserver`
 
 ## Аутентификация
 
