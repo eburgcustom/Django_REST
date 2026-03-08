@@ -142,3 +142,7 @@ AUTH_USER_MODEL = "users.User"
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Stripe settings
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='pk_test_123')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='sk_test_123')
