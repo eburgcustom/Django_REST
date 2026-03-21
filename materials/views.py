@@ -24,8 +24,8 @@ class CourseViewSet(viewsets.ModelViewSet):
         # Обычные пользователи видят только свои курсы
         user = self.request.user
         if user.groups.filter(name="moderator").exists():
-            return Course.objects.all().order_by('id')
-        return Course.objects.filter(owner=user).order_by('id')
+            return Course.objects.all().order_by("id")
+        return Course.objects.filter(owner=user).order_by("id")
 
     def get_permissions(self):
         if self.action == "create":
@@ -61,8 +61,8 @@ class LessonListCreateView(generics.ListCreateAPIView):
         # Обычные пользователи видят только свои уроки
         user = self.request.user
         if user.groups.filter(name="moderator").exists():
-            return Lesson.objects.all().order_by('id')
-        return Lesson.objects.filter(owner=user).order_by('id')
+            return Lesson.objects.all().order_by("id")
+        return Lesson.objects.filter(owner=user).order_by("id")
 
     def get_permissions(self):
         if self.request.method == "POST":
@@ -77,6 +77,7 @@ class LessonListCreateView(generics.ListCreateAPIView):
         # Проверяем, что пользователь не модератор
         if self.request.user.groups.filter(name="moderator").exists():
             from rest_framework.exceptions import PermissionDenied
+
             raise PermissionDenied("Модераторы не могут создавать уроки")
         # Автоматически привязываем урок к текущему пользователю
         serializer.save(owner=self.request.user)
@@ -97,8 +98,8 @@ class LessonRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         # Обычные пользователи видят только свои уроки
         user = self.request.user
         if user.groups.filter(name="moderator").exists():
-            return Lesson.objects.all().order_by('id')
-        return Lesson.objects.filter(owner=user).order_by('id')
+            return Lesson.objects.all().order_by("id")
+        return Lesson.objects.filter(owner=user).order_by("id")
 
     def get_permissions(self):
         if self.request.method == "GET":

@@ -21,6 +21,9 @@ class Course(models.Model):
         null=True,
         blank=True,
     )
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00, verbose_name="Цена курса"
+    )
 
     def __str__(self):
         return self.title
@@ -52,6 +55,9 @@ class Lesson(models.Model):
         verbose_name="Владелец",
         null=True,
         blank=True,
+    )
+    price = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00, verbose_name="Цена урока"
     )
 
     def __str__(self):

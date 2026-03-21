@@ -82,6 +82,15 @@ class Payment(models.Model):
     payment_method = models.CharField(
         max_length=10, choices=PAYMENT_METHODS, verbose_name="Способ оплаты"
     )
+    stripe_session_id = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="ID сессии Stripe"
+    )
+    stripe_payment_url = models.URLField(
+        max_length=500, blank=True, null=True, verbose_name="Ссылка на оплату Stripe"
+    )
+    is_paid = models.BooleanField(
+        default=False, verbose_name="Оплачено"
+    )
 
     def __str__(self):
         return f"{self.user.email} - {self.amount} руб. ({self.get_payment_method_display()})"

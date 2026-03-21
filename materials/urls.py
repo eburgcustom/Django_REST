@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .payment_views import CreatePaymentView, PaymentStatusView
 from .views import (CourseViewSet, LessonListCreateView,
                     LessonRetrieveUpdateDestroyView, SubscriptionAPIView)
 
@@ -18,4 +19,10 @@ urlpatterns = [
         name="lesson-detail",
     ),
     path("subscription/", SubscriptionAPIView.as_view(), name="subscription"),
+    path("payment/create/", CreatePaymentView.as_view(), name="create-payment"),
+    path(
+        "payment/<int:payment_id>/status/",
+        PaymentStatusView.as_view(),
+        name="payment-status",
+    ),
 ]
