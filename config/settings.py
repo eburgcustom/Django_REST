@@ -163,6 +163,18 @@ CELERY_TASK_TRACK_STARTED = True
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
+# Настройки celery-beat
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_BEAT_SCHEDULE = {
+    'check-inactive-users': {
+        'task': 'materials.tasks.check_inactive_users',
+        'schedule': timedelta(days=1),  # Каждый день в 00:00
+        'options': {
+            'queue': 'default',
+        }
+    },
+}
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',

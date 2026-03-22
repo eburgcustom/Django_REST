@@ -4,6 +4,51 @@ from celery import shared_task
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.auth.models import User
+
+
+@shared_task
+def check_inactive_users():
+    """
+    Проверяет пользователей, которые не заходили более месяца, и блокирует их.
+    """
+    try:
+        # Дата месяц назад
+        month_ago = timezone.now() - timedelta(days=30)
+        
+        # Находим пользователей, которые не заходили более месяца
+        inactive_users = User.objects.filter(
+            last_login__lt=month_ago,
+            is_active=True
+        )
+        
+        blocked_count = 0
+        
+        for user in inactive_users:
+            # Блокируем пользователя
+            user.is_active = False
+            user.save(update_fields=['is_active'])
+            blocked_count += 1
+            
+            # Отправляем уведомление на email
+            try:
+                send_mail(
+                    subject='Ваш аккаунт был заблокирован',
+                    message=f'Здравствуйте, {user.username}!\n\n'
+                           f'Ваш аккаунт был заблокирован, так как вы не заходили в систему более 30 дней.\n\n'
+                           f'Для разблокировки обратитесь к администратору.',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                # Игнорируем ошибки отправки email
+                pass
+        
+        return f"Заблокировано {blocked_count} неактивных пользователей"
+        
+    except Exception as e:
+        return f"Ошибка при проверке неактивных пользователей: {str(e)}"
 
 
 @shared_task
