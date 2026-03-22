@@ -24,6 +24,7 @@ class Course(models.Model):
     price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.00, verbose_name="Цена курса"
     )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def __str__(self):
         return self.title
@@ -59,6 +60,7 @@ class Lesson(models.Model):
     price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0.00, verbose_name="Цена урока"
     )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def __str__(self):
         return self.title
