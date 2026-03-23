@@ -8,6 +8,7 @@ from users.permissions import IsOwnerOrModerator
 from .models import Course, Lesson, Subscription
 from .paginators import StandardPagination
 from .serializers import CourseSerializer, LessonSerializer
+from .tasks import send_course_update_email_with_delay
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -45,6 +46,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Автоматически привязываем курс к текущему пользователю
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        # Вызываем стандартное сохранение
+        course = serializer.save()
+
+        # Запускаем асинхронную задачу на отправку писем
+        send_course_update_email_with_delay.delay(course.id)
 
 
 class LessonListCreateView(generics.ListCreateAPIView):
@@ -112,6 +120,13 @@ class LessonRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
             # Удаление - авторизованные (с фильтрацией по владельцу в get_queryset)
             self.permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in self.permission_classes]
+
+    def perform_update(self, serializer):
+        # Вызываем стандартное сохранение
+        lesson = serializer.save()
+
+        # Запускаем асинхронную задачу на отправку писем
+        send_course_update_email_with_delay.delay(lesson.course.id)
 
 
 class SubscriptionAPIView(APIView):
