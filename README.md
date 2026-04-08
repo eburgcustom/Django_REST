@@ -152,16 +152,38 @@
 
 ## Установка
 
+### Способ 1: Docker Compose (рекомендуется)
+
+1. **Клонировать репозиторий**
+2. **Создать `.env` файл на основе `.env_example`**
+   ```bash
+   cp .env_example .env
+   ```
+3. **Настроить переменные окружения в `.env`:**
+   - `SECRET_KEY` - сгенерировать новый ключ
+   - `DATABASE_USER`, `DATABASE_PASSWORD` - данные для PostgreSQL
+   - `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` - данные для почты
+   - `STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY` - ключи Stripe
+
+4. **Запустить все сервисы:**
+   ```bash
+   docker-compose up --build
+   ```
+
+5. **Выполнить миграции и создать суперпользователя:**
+   ```bash
+   docker-compose exec backend python manage.py migrate
+   docker-compose exec backend python manage.py csu
+   ```
+
+### Способ 2: Локальная установка
+
 1. Клонировать репозиторий
 2. Установить зависимости: `poetry install --no-root`
 3. Создать `.env` файл на основе `.env_example`
-4. Добавить Stripe ключи в `.env`:
-   ```
-   STRIPE_PUBLISHABLE_KEY=pk_test_... (получить на https://dashboard.stripe.com/apikeys)
-   STRIPE_SECRET_KEY=sk_test_... (получить на https://dashboard.stripe.com/apikeys)
-   ```
+4. Добавить Stripe ключи в `.env`
 5. Выполнить миграции: `python manage.py migrate`
-6. Создать группу модераторов: `python manage.py loaddata users/fixtures/groups.json`
+6. Создать суперпользователя: `python manage.py csu`
 7. Запустить сервер: `python manage.py runserver`
 
 ## Аутентификация
@@ -251,6 +273,82 @@ python manage.py test materials.tests.SubscriptionTestCase
 - Функционал подписок
 - Валидацию YouTube ссылок
 - Пагинацию
+
+## Проверка работоспособности сервисов
+
+### Docker Compose
+
+После запуска `docker-compose up --build` проверьте каждый сервис:
+
+1. **Django Backend:**
+   ```bash
+   # Проверить статус контейнера
+   docker-compose ps backend
+   
+   # Посмотреть логи
+   docker-compose logs backend
+   
+   # Проверить API
+   curl http://localhost:8000/api/materials/courses/
+   ```
+
+2. **PostgreSQL:**
+   ```bash
+   # Проверить статус контейнера
+   docker-compose ps db
+   
+   # Подключиться к базе
+   
+   
+   # Проверить таблицы
+   \dt
+   ```
+
+3. **Redis:**
+   ```bash
+   # Проверить статус
+   docker-compose ps redis
+   
+   # Тестировать подключение
+   docker-compose exec redis redis-cli ping
+   ```
+
+4. **Celery Worker:**
+   ```bash
+   # Проверить статус
+   docker-compose ps celery-worker
+   
+   # Посмотреть логи
+   docker-compose logs celery-worker
+   ```
+
+5. **Celery Beat:**
+   ```bash
+   # Проверить статус
+   docker-compose ps celery-beat
+   
+   # Посмотреть логи
+   docker-compose logs celery-beat
+   ```
+
+### Полезные команды
+
+```bash
+# Остановить все сервисы
+docker-compose down
+
+# Перезапустить с пересборкой
+docker-compose up --build --force-recreate
+
+# Выполнить команду в контейнере
+docker-compose exec backend python manage.py shell
+
+# Посмотреть логи всех сервисов
+docker-compose logs -f
+
+# Очистить volumes (удалит данные БД)
+docker-compose down -v
+```
 
 ## Создание тестовых данных
 
