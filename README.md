@@ -350,6 +350,112 @@ docker-compose logs -f
 docker-compose down -v
 ```
 
+## CI/CD и Автоматический Деплой
+
+### GitHub Actions Workflow
+
+Проект использует GitHub Actions для автоматического тестирования и деплоя:
+
+**Что происходит при push:**
+1. **Запускаются тесты** - автоматически с SQLite
+2. **Собирается Docker образ** - если тесты пройдены
+3. **Пушится в Docker Hub** - с тегом по SHA коммита
+4. **Деплоится на сервер** - автоматически через SSH
+
+### Настройка GitHub Secrets
+
+Добавьте в репозитории GitHub → Settings → Secrets and variables → Actions:
+
+```
+DOCKER_USERNAME=your_dockerhub_username
+DOCKER_PASSWORD=your_dockerhub_token
+PROD_HOST=your_server_ip
+PROD_USER=ssh_user
+PROD_SSH_KEY=-----BEGIN OPENSSH PRIVATE KEY-----
+```
+
+### Настройка удаленного сервера
+
+**1. Установите Docker:**
+```bash
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+```
+
+**2. Настройте SSH доступ:**
+```bash
+# Для личного сервера можно использовать существующего пользователя
+# Добавьте пользователя в группу docker
+sudo usermod -aG docker your_username
+
+# Настройте SSH ключи (если еще не настроены)
+mkdir -p ~/.ssh
+# Добавьте ваш публичный ключ в ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+```
+
+**3. Создайте директорию проекта:**
+```bash
+sudo mkdir -p /opt/django-rest
+sudo chown your_username:your_username /opt/django-rest
+```
+
+**4. Создайте .env файл с переменными окружения:**
+```bash
+nano /opt/django-rest/.env
+```
+
+Добавьте переменные из вашего локального .env файла:
+```bash
+SECRET_KEY=your_production_secret_key
+DEBUG=False
+DATABASE_NAME=django_rest_db
+DATABASE_USER=django_user
+DATABASE_PASSWORD=your_production_db_password
+DATABASE_HOST=db
+DATABASE_PORT=5432
+PASSWORD_FOR_SUPER_USER=your_password
+STRIPE_PUBLISHABLE_KEY=pk_live_your_key
+STRIPE_SECRET_KEY=sk_live_your_key
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
+EMAIL_HOST_USER=your_email@yandex.ru
+EMAIL_HOST_PASSWORD=your_email_password
+DEFAULT_FROM_EMAIL=your_email@yandex.ru
+SERVER_EMAIL=your_email@yandex.ru
+```
+
+**5. Установите правильные права доступа для .env:**
+```bash
+chmod 600 /opt/django-rest/.env
+chown your_username:your_username /opt/django-rest/.env
+```
+
+### Запуск деплоя
+
+**Автоматический:**
+```bash
+# Просто сделайте push в main ветку
+git add .
+git commit -m "Update and deploy"
+git push origin main
+```
+
+**Ручной запуск в GitHub:**
+1. Перейдите в Actions → CI/CD
+2. Нажмите "Run workflow"
+
+### Проверка деплоя
+
+```bash
+# На сервере проверьте контейнер
+ssh deploy@your_server
+docker ps
+docker logs django-rest
+```
+
 ## Создание тестовых данных
 
 **Через кастомную команду:**
