@@ -38,6 +38,10 @@ jobs:
         EMAIL_HOST_PASSWORD: test_password
         DEFAULT_FROM_EMAIL: test@example.com
         SERVER_EMAIL: test@example.com
+        CELERY_BROKER_URL: redis://localhost:6379/0
+        CELERY_RESULT_BACKEND: redis://localhost:6379/0
+        STRIPE_PUBLISHABLE_KEY: pk_test_123
+        STRIPE_SECRET_KEY: sk_test_123
       run: |
         poetry run python manage.py test
 
