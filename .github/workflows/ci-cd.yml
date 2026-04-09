@@ -26,6 +26,18 @@ jobs:
         poetry install --no-root --no-interaction
 
     - name: Run tests
+      env:
+        SECRET_KEY: test-secret-key-for-ci
+        DEBUG: False
+        DATABASE_NAME: test_db
+        DATABASE_USER: test_user
+        DATABASE_PASSWORD: test_password
+        DATABASE_HOST: localhost
+        DATABASE_PORT: 5432
+        EMAIL_HOST_USER: test@example.com
+        EMAIL_HOST_PASSWORD: test_password
+        DEFAULT_FROM_EMAIL: test@example.com
+        SERVER_EMAIL: test@example.com
       run: |
         poetry run python manage.py test
 
