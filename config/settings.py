@@ -18,6 +18,9 @@ from django.conf.global_settings import LOGIN_REDIRECT_URL
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Test settings
+TESTING = 'test' in sys.argv
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
@@ -154,6 +157,11 @@ CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 
 # URL-адрес брокера результатов, также Redis
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
+
+# Синхронное выполнение задач в тестах (повторный запуск не требуется)
+if TESTING:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = TIME_ZONE
