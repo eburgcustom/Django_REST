@@ -67,14 +67,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.8.1
-      with:
-        ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
-
     - name: Deploy to Server
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} << 'EOF'
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/django-rest:${{ github.sha }}
           docker stop django-rest || true
           docker rm django-rest || true
@@ -82,4 +81,3 @@ jobs:
             --env-file /opt/django-rest/.env \
             --restart unless-stopped \
             ${{ secrets.DOCKER_USERNAME }}/django-rest:${{ github.sha }}
-        EOF
