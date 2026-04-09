@@ -73,6 +73,7 @@ jobs:
         host: ${{ secrets.PROD_HOST }}
         username: ${{ secrets.PROD_USER }}
         key: ${{ secrets.PROD_SSH_KEY }}
+        passphrase: ${{ secrets.PROD_SSH_PASSPHRASE }}
         script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/django-rest:${{ github.sha }}
           docker stop django-rest || true
