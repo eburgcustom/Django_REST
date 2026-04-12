@@ -58,7 +58,7 @@ class LessonCRUDTestCase(APITestCase):
     def test_lesson_list_as_owner(self):
         """Тест получения списка уроков владельцем."""
         self.client.force_authenticate(user=self.user1)
-        response = self.client.get("/api/lessons/")
+        response = self.client.get("/api/materials/lessons/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
@@ -67,7 +67,7 @@ class LessonCRUDTestCase(APITestCase):
     def test_lesson_list_as_moderator(self):
         """Тест получения списка уроков модератором."""
         self.client.force_authenticate(user=self.moderator)
-        response = self.client.get("/api/lessons/")
+        response = self.client.get("/api/materials/lessons/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 2)
@@ -81,7 +81,7 @@ class LessonCRUDTestCase(APITestCase):
             "video_url": "https://youtube.com/watch?v=789",
             "course": self.course1.id,
         }
-        response = self.client.post("/api/lessons/", data)
+        response = self.client.post("/api/materials/lessons/", data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Lesson.objects.count(), 3)
@@ -98,14 +98,14 @@ class LessonCRUDTestCase(APITestCase):
             "video_url": "https://youtube.com/watch?v=789",
             "course": self.course1.id,
         }
-        response = self.client.post("/api/lessons/", data)
+        response = self.client.post("/api/materials/lessons/", data)
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_lesson_retrieve_as_owner(self):
         """Тест получения урока владельцем."""
         self.client.force_authenticate(user=self.user1)
-        response = self.client.get(f"/api/lessons/{self.lesson1.id}/")
+        response = self.client.get(f"/api/materials/lessons/{self.lesson1.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["title"], "Lesson 1")
@@ -113,14 +113,14 @@ class LessonCRUDTestCase(APITestCase):
     def test_lesson_retrieve_as_moderator(self):
         """Тест получения урока модератором."""
         self.client.force_authenticate(user=self.moderator)
-        response = self.client.get(f"/api/lessons/{self.lesson1.id}/")
+        response = self.client.get(f"/api/materials/lessons/{self.lesson1.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_lesson_retrieve_as_other_user_forbidden(self):
         """Тест получения урока другим пользователем (запрещено)."""
         self.client.force_authenticate(user=self.user2)
-        response = self.client.get(f"/api/lessons/{self.lesson1.id}/")
+        response = self.client.get(f"/api/materials/lessons/{self.lesson1.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -128,7 +128,7 @@ class LessonCRUDTestCase(APITestCase):
         """Тест обновления урока владельцем."""
         self.client.force_authenticate(user=self.user1)
         data = {"title": "Updated Lesson", "description": "Updated Description"}
-        response = self.client.patch(f"/api/lessons/{self.lesson1.id}/", data)
+        response = self.client.patch(f"/api/materials/lessons/{self.lesson1.id}/", data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.lesson1.refresh_from_db()
@@ -141,7 +141,7 @@ class LessonCRUDTestCase(APITestCase):
             "title": "Updated Lesson by Moderator",
             "description": "Updated Description",
         }
-        response = self.client.patch(f"/api/lessons/{self.lesson1.id}/", data)
+        response = self.client.patch(f"/api/materials/lessons/{self.lesson1.id}/", data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.lesson1.refresh_from_db()
@@ -150,7 +150,7 @@ class LessonCRUDTestCase(APITestCase):
     def test_lesson_delete_as_owner(self):
         """Тест удаления урока владельцем."""
         self.client.force_authenticate(user=self.user1)
-        response = self.client.delete(f"/api/lessons/{self.lesson1.id}/")
+        response = self.client.delete(f"/api/materials/lessons/{self.lesson1.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Lesson.objects.count(), 1)
@@ -158,7 +158,7 @@ class LessonCRUDTestCase(APITestCase):
     def test_lesson_delete_as_moderator(self):
         """Тест удаления урока модератором."""
         self.client.force_authenticate(user=self.moderator)
-        response = self.client.delete(f"/api/lessons/{self.lesson1.id}/")
+        response = self.client.delete(f"/api/materials/lessons/{self.lesson1.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Lesson.objects.count(), 1)
@@ -166,7 +166,7 @@ class LessonCRUDTestCase(APITestCase):
     def test_lesson_delete_as_other_user_forbidden(self):
         """Тест удаления урока другим пользователем (запрещено)."""
         self.client.force_authenticate(user=self.user2)
-        response = self.client.delete(f"/api/lessons/{self.lesson1.id}/")
+        response = self.client.delete(f"/api/materials/lessons/{self.lesson1.id}/")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -198,7 +198,7 @@ class SubscriptionTestCase(APITestCase):
         """Тест подписки на курс."""
         self.client.force_authenticate(user=self.user1)
         data = {"course_id": self.course2.id}
-        response = self.client.post("/api/subscription/", data)
+        response = self.client.post("/api/materials/subscription/", data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "подписка добавлена")
@@ -215,7 +215,7 @@ class SubscriptionTestCase(APITestCase):
 
         self.client.force_authenticate(user=self.user1)
         data = {"course_id": self.course2.id}
-        response = self.client.post("/api/subscription/", data)
+        response = self.client.post("/api/materials/subscription/", data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "подписка удалена")
@@ -229,7 +229,7 @@ class SubscriptionTestCase(APITestCase):
         """Тест подписки на собственный курс."""
         self.client.force_authenticate(user=self.user1)
         data = {"course_id": self.course1.id}
-        response = self.client.post("/api/subscription/", data)
+        response = self.client.post("/api/materials/subscription/", data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["message"], "подписка добавлена")
@@ -238,7 +238,7 @@ class SubscriptionTestCase(APITestCase):
         """Тест подписки без указания ID курса."""
         self.client.force_authenticate(user=self.user1)
         data = {}
-        response = self.client.post("/api/subscription/", data)
+        response = self.client.post("/api/materials/subscription/", data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data["error"], "Не указан ID курса")
@@ -247,14 +247,14 @@ class SubscriptionTestCase(APITestCase):
         """Тест подписки на несуществующий курс."""
         self.client.force_authenticate(user=self.user1)
         data = {"course_id": 999}
-        response = self.client.post("/api/subscription/", data)
+        response = self.client.post("/api/materials/subscription/", data)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_subscription_unauthorized(self):
         """Тест подписки без авторизации."""
         data = {"course_id": self.course1.id}
-        response = self.client.post("/api/subscription/", data)
+        response = self.client.post("/api/materials/subscription/", data)
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -273,7 +273,7 @@ class SubscriptionTestCase(APITestCase):
         moderator.groups.add(moderator_group)
 
         self.client.force_authenticate(user=moderator)
-        response = self.client.get("/api/courses/")
+        response = self.client.get("/api/materials/courses/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 

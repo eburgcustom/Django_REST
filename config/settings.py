@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
+import sys
 from datetime import timedelta
 from pathlib import Path
 from decouple import config
@@ -16,6 +17,9 @@ from django.conf.global_settings import LOGIN_REDIRECT_URL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Test settings
+TESTING = 'test' in sys.argv
 
 
 # Quick-start development settings - unsuitable for production
@@ -154,6 +158,11 @@ CELERY_BROKER_URL = config('CELERY_BROKER_URL')
 # URL-адрес брокера результатов, также Redis
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
 
+# Синхронное выполнение задач в тестах (повторный запуск не требуется)
+if TESTING:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = TIME_ZONE
 
@@ -192,3 +201,11 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
 SERVER_EMAIL = config("SERVER_EMAIL")
+
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        }
+    }

@@ -1,0 +1,84 @@
+name: Test and Deploy
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.7.1
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+        cache: 'poetry'
+
+    - name: Install dependencies
+      run: |
+        poetry install --no-root --no-interaction
+
+    - name: Run tests
+      env:
+        SECRET_KEY: test-secret-key-for-ci
+        DEBUG: False
+        DATABASE_NAME: test_db
+        DATABASE_USER: test_user
+        DATABASE_PASSWORD: test_password
+        DATABASE_HOST: localhost
+        DATABASE_PORT: 5432
+        EMAIL_HOST_USER: test@example.com
+        EMAIL_HOST_PASSWORD: test_password
+        DEFAULT_FROM_EMAIL: test@example.com
+        SERVER_EMAIL: test@example.com
+        CELERY_BROKER_URL: redis://localhost:6379/0
+        CELERY_RESULT_BACKEND: redis://localhost:6379/0
+        STRIPE_PUBLISHABLE_KEY: pk_test_123
+        STRIPE_SECRET_KEY: sk_test_123
+      run: |
+        poetry run python manage.py test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Log in to Docker Hub
+      run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+    - name: Build Docker image
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/django-rest:${{ github.sha }} .
+
+    - name: Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/django-rest:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to Server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        passphrase: ${{ secrets.PROD_SSH_PASSPHRASE }}
+        script: |
+          docker pull ${{ secrets.DOCKER_USERNAME }}/django-rest:${{ github.sha }}
+          docker stop django-rest || true
+          docker rm django-rest || true
+          docker run -d --name django-rest -p 8000:8000 \
+            --env-file /opt/django-rest/.env \
+            --restart unless-stopped \
+            ${{ secrets.DOCKER_USERNAME }}/django-rest:${{ github.sha }}
